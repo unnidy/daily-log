@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Xin's Daily Log · 每日打卡</title>
 <!-- 下面几行是"假装成手机App"的关键:添加到主屏幕后全屏显示、有自己的图标 -->
-<meta name="theme-color" content="#6c7cf5">
+<meta name="theme-color" content="#FFC83D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,12 +18,13 @@
 /* ============ 整体样式 ============ */
 /* :root 里定义"颜色变量",后面写 var(--xx) 就是引用这里的颜色,改一处全局生效 */
 :root {
-  --bg: #f6f7fb;
+  --bg: #f8f6f0;
   --card: #ffffff;
-  --text: #2b2d36;
-  --text-light: #9a9db0;
-  --primary: #6c7cf5;
-  --line: #ececf2;
+  --text: #3a3326;
+  --text-light: #a39d8c;
+  --primary: #f0a800;        /* 主题黄(深一点,保证文字看得清) */
+  --primary-soft: #fff3d1;   /* 浅黄,做按钮底色 */
+  --line: #f0ece0;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
@@ -36,16 +37,16 @@ body {
 /* 内容区:手机上占满,电脑上居中、最宽 520px,看起来像手机 App */
 .container { max-width: 520px; margin: 0 auto; padding: 0 16px; }
 
-/* 顶部标题区 */
+/* 顶部标题区:太阳黄渐变 */
 header {
-  background: linear-gradient(135deg, #6c7cf5, #9b6cf5);
-  color: #fff;
+  background: linear-gradient(135deg, #ffd95e, #ffb52e);
+  color: #5c4400;
   /* env(safe-area-inset-top) = iPhone 刘海/状态栏的高度,全屏App模式下自动留空 */
   padding: calc(22px + env(safe-area-inset-top)) 0 18px;
   margin-bottom: 16px;
 }
 header h1 { font-size: 20px; font-weight: 700; }
-header .date { font-size: 13px; opacity: .85; margin-top: 4px; }
+header .date { font-size: 13px; opacity: .75; margin-top: 4px; }
 
 /* ============ 今天页:习惯卡片 ============ */
 .habit-card {
@@ -111,13 +112,76 @@ header .date { font-size: 13px; opacity: .85; margin-top: 4px; }
   font-weight: 600;
   cursor: pointer;
 }
-.big-btn.primary { background: var(--primary); color: #fff; }
-.big-btn.ghost { background: #ecedfb; color: var(--primary); }
+.big-btn.primary { background: #ffc83d; color: #5c4400; }
+.big-btn.ghost { background: var(--primary-soft); color: #a87b00; }
+.edit-hint { text-align: center; font-size: 12px; color: var(--text-light); margin-top: 10px; }
 
 /* ============ 日历页 ============ */
-/* 习惯选择小胶囊,横向可滑动 */
+.cal-card { background: var(--card); border-radius: 16px; padding: 16px 10px; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 6px; }
+.cal-head .title { font-weight: 700; font-size: 16px; }
+.cal-nav {
+  border: none; background: var(--bg);
+  width: 32px; height: 32px; border-radius: 10px;
+  font-size: 15px; cursor: pointer; color: var(--text);
+}
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-week { text-align: center; font-size: 11px; color: var(--text-light); padding: 6px 0; }
+/* 日期格子:上面是数字,下面是小彩球矩阵 */
+.cal-cell {
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 0;
+  border: none; background: none;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.cal-cell:active { background: var(--bg); }
+.cal-num {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  color: var(--text);
+}
+.cal-num.today { background: var(--primary); color: #fff; font-weight: 700; }
+.cal-cell.future { cursor: default; }
+.cal-cell.future .cal-num { color: #d9d4c5; }
+/* 小彩球矩阵:最多 3×3 = 9 个 */
+.cal-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 6px);
+  gap: 2px;
+  justify-content: center;
+}
+.cal-dots .d { width: 6px; height: 6px; border-radius: 50%; }
+/* 图例 */
+.legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
+.lg-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 13px;
+  border-radius: 99px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text);
+}
+.lg-chip .d { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.lg-chip.sel { border-width: 2px; font-weight: 600; }
+/* 选中习惯后显示的统计条 */
+.cal-stat-line { display: flex; justify-content: space-around; margin-top: 14px; background: var(--card); border-radius: 16px; padding: 14px 0; }
+.cal-stat-line .num { font-size: 20px; font-weight: 700; text-align: center; }
+.cal-stat-line .lbl { font-size: 11px; color: var(--text-light); text-align: center; margin-top: 2px; }
+.cal-tip { text-align: center; font-size: 12px; color: var(--text-light); margin-top: 12px; line-height: 1.7; }
+
+/* ============ 统计页 ============ */
 .chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 12px; }
 .chip {
+  display: flex; align-items: center; gap: 5px;
   padding: 7px 14px;
   border-radius: 99px;
   background: var(--card);
@@ -125,47 +189,23 @@ header .date { font-size: 13px; opacity: .85; margin-top: 4px; }
   font-size: 13px;
   white-space: nowrap;
   cursor: pointer;
+  color: var(--text);
 }
-.chip.active { color: #fff; border-color: transparent; }
-.cal-card { background: var(--card); border-radius: 16px; padding: 16px; }
-.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.cal-head .title { font-weight: 700; font-size: 16px; }
-.cal-nav {
-  border: none; background: var(--bg);
-  width: 32px; height: 32px; border-radius: 10px;
-  font-size: 15px; cursor: pointer; color: var(--text);
-}
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.cal-week { text-align: center; font-size: 11px; color: var(--text-light); padding: 6px 0; }
-.cal-day {
-  aspect-ratio: 1;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%;
-  font-size: 13px;
-  cursor: pointer;
-  border: none; background: none; color: var(--text);
-}
-.cal-day.checked { color: #fff; font-weight: 600; }
-.cal-day.today-ring { box-shadow: inset 0 0 0 2px var(--primary); }
-.cal-day.future { color: #d4d6e0; cursor: default; }
-.cal-tip { text-align: center; font-size: 12px; color: var(--text-light); margin-top: 12px; }
-.cal-stat-line { display: flex; justify-content: space-around; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
-.cal-stat-line .num { font-size: 20px; font-weight: 700; text-align: center; }
-.cal-stat-line .lbl { font-size: 11px; color: var(--text-light); text-align: center; margin-top: 2px; }
-
-/* ============ 统计页 ============ */
+.chip.active { color: #fff; border-color: transparent; font-weight: 600; }
 .stat-card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
 .stat-card h3 { font-size: 14px; margin-bottom: 12px; }
+/* 月度热力图:行=星期,列=第几周;格子固定 20px 小方块,整体居中,不占太多屏幕 */
+.heat-grid { display: grid; gap: 4px; grid-auto-rows: 20px; justify-content: center; }
+.heat-label { font-size: 10px; color: var(--text-light); display: flex; align-items: center; justify-content: center; }
+.heat-cell { border-radius: 5px; background: var(--bg); }
+.heat-cell.none { background: transparent; }
+.heat-cell.future { background: transparent; border: 1.5px dashed var(--line); }
+.heat-summary { text-align: center; font-size: 12px; color: var(--text-light); margin-top: 12px; }
 .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; }
 .bar-label { width: 86px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bar-track { flex: 1; height: 14px; background: var(--bg); border-radius: 99px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 99px; transition: width .4s; }
 .bar-pct { width: 40px; text-align: right; color: var(--text-light); font-size: 12px; flex-shrink: 0; }
-/* 最近7天小圆点矩阵 */
-.dots-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.dots-table td, .dots-table th { text-align: center; padding: 5px 2px; font-weight: normal; }
-.dots-table .hname { text-align: left; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--bg); display: inline-block; }
 
 /* ============ 底部导航栏 ============ */
 nav {
@@ -187,7 +227,7 @@ nav button {
 nav button .ico { display: block; font-size: 20px; margin-bottom: 2px; }
 nav button.active { color: var(--primary); font-weight: 600; }
 
-/* ============ 添加习惯的弹窗 ============ */
+/* ============ 添加/编辑习惯的弹窗 ============ */
 .modal-mask {
   position: fixed; inset: 0;
   background: rgba(0,0,0,.4);
@@ -203,6 +243,8 @@ nav button.active { color: var(--primary); font-weight: 600; }
   padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
   width: 100%;
   max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
 }
 .modal h3 { font-size: 17px; margin-bottom: 14px; }
 .modal input[type=text] {
@@ -225,7 +267,10 @@ nav button.active { color: var(--primary); font-weight: 600; }
 }
 .picker .opt.sel { border-color: var(--primary); }
 .picker .copt { border-radius: 50%; }
-.modal-label { font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
+/* Treat Day 星期选择按钮 */
+.picker .wopt { font-size: 14px; color: var(--text); }
+.picker .wopt.sel { background: var(--primary-soft); border-color: var(--primary); color: #a87b00; font-weight: 700; }
+.modal-label { font-size: 12px; color: var(--text-light); margin-bottom: 6px; line-height: 1.6; }
 
 .empty-tip { text-align: center; color: var(--text-light); font-size: 14px; padding: 50px 0 30px; line-height: 1.8; }
 .hidden { display: none !important; }
@@ -235,7 +280,7 @@ nav button.active { color: var(--primary); font-weight: 600; }
 
 <header>
   <div class="container">
-    <h1>🌱 Xin's Daily Log</h1>
+    <h1>⭐ Xin's Daily Log</h1>
     <div class="date" id="header-date"></div>
   </div>
 </header>
@@ -249,11 +294,11 @@ nav button.active { color: var(--primary); font-weight: 600; }
     <button class="big-btn primary" onclick="openModal()">＋ 添加习惯</button>
     <button class="big-btn ghost" id="edit-btn" onclick="toggleEdit()">管理</button>
   </div>
+  <div class="edit-hint hidden" id="edit-hint">管理模式:点习惯卡片可以编辑(名字 / 图标 / 颜色 / Treat Day),点 ✕ 删除</div>
 </div>
 
-<!-- ============ 第2页:日历(也是补卡的地方) ============ -->
+<!-- ============ 第2页:日历(所有习惯一起看 + 补卡) ============ -->
 <div class="container page hidden" id="page-cal">
-  <div class="chips" id="cal-chips"></div>
   <div class="cal-card">
     <div class="cal-head">
       <button class="cal-nav" onclick="moveMonth(-1)">‹</button>
@@ -261,25 +306,32 @@ nav button.active { color: var(--primary); font-weight: 600; }
       <button class="cal-nav" onclick="moveMonth(1)">›</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
-    <div class="cal-stat-line" id="cal-stats"></div>
   </div>
-  <div class="cal-tip">点任意一天可以补卡 / 取消打卡(未来的日子不行哦)</div>
+  <div class="legend" id="cal-legend"></div>
+  <div class="cal-stat-line hidden" id="cal-stats"></div>
+  <div class="cal-tip" id="cal-tip"></div>
 </div>
 
 <!-- ============ 第3页:统计 ============ -->
 <div class="container page hidden" id="page-stats">
+  <div class="chips" id="stats-chips"></div>
+  <div class="stat-card">
+    <div class="cal-head" style="padding:0">
+      <button class="cal-nav" onclick="moveStatsMonth(-1)">‹</button>
+      <span class="title" id="heat-title" style="font-weight:700;font-size:15px"></span>
+      <button class="cal-nav" onclick="moveStatsMonth(1)">›</button>
+    </div>
+    <div style="margin-top:12px" id="heat-grid-wrap"></div>
+    <div class="heat-summary" id="heat-summary"></div>
+  </div>
   <div class="stat-card">
     <h3>📊 最近 30 天完成率</h3>
     <div id="stats-bars"></div>
   </div>
   <div class="stat-card">
-    <h3>🗓️ 最近 7 天一览</h3>
-    <table class="dots-table" id="dots-table"></table>
-  </div>
-  <div class="stat-card">
     <h3>💾 数据备份</h3>
     <p style="font-size:12px;color:var(--text-light);margin-bottom:12px;line-height:1.6">
-      打卡记录存在这台设备的浏览器里。建议偶尔导出一份备份文件存到 OneDrive;换设备时用"恢复"导入即可。
+      打卡记录存在这台设备的浏览器里。建议偶尔导出一份备份文件存到 OneDrive / iCloud;换设备时用"恢复"导入即可。
     </p>
     <div class="row-btns" style="margin-top:0">
       <button class="big-btn ghost" onclick="exportData()">导出备份</button>
@@ -296,18 +348,20 @@ nav button.active { color: var(--primary); font-weight: 600; }
   <button id="tab-stats" onclick="switchPage('stats')"><span class="ico">📈</span>统计</button>
 </nav>
 
-<!-- 添加习惯的弹窗 -->
+<!-- 添加/编辑习惯的弹窗 -->
 <div class="modal-mask" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <h3>添加新习惯</h3>
+    <h3 id="modal-title">添加新习惯</h3>
     <input type="text" id="new-name" placeholder="习惯名称,比如:喝够8杯水" maxlength="12">
     <div class="modal-label">选个图标</div>
     <div class="picker" id="emoji-picker"></div>
     <div class="modal-label">选个颜色</div>
     <div class="picker" id="color-picker"></div>
+    <div class="modal-label">Treat Day · 休息日(选中的星期,不打卡也不会断连续记录;打了卡照样算数)</div>
+    <div class="picker" id="week-picker"></div>
     <div class="row-btns" style="margin-top:4px">
       <button class="big-btn ghost" onclick="closeModal()">取消</button>
-      <button class="big-btn primary" onclick="addHabit()">保存</button>
+      <button class="big-btn primary" onclick="saveHabit()">保存</button>
     </div>
   </div>
 </div>
@@ -316,6 +370,7 @@ nav button.active { color: var(--primary); font-weight: 600; }
 /* ================================================================
    数据部分
    所有数据是一个对象:{ habits: [习惯列表], checks: {习惯id: [打卡日期]} }
+   习惯里的 treatDays 是数组,存星期几(0=周日,1=周一 ... 6=周六)
    存在浏览器的 localStorage(本地小仓库)里,key 叫 xin-daily-log
 ================================================================ */
 const STORE_KEY = 'xin-daily-log';
@@ -342,6 +397,8 @@ function fmt(d) {
 }
 function todayStr() { return fmt(new Date()); }
 
+function habitById(id) { return state.habits.find(h => h.id === id); }
+
 /* ============ 打卡核心逻辑 ============ */
 function isChecked(habitId, dateStr) {
   return (state.checks[habitId] || []).includes(dateStr);
@@ -358,24 +415,50 @@ function toggleCheck(habitId, dateStr) {
   renderAll();
 }
 
-// 当前连续天数:从今天往前数,连续打卡了几天(今天还没打就从昨天数起)
+// 这一天是不是该习惯的 Treat Day(休息日)
+function isTreatDay(habit, dateObj) {
+  return (habit.treatDays || []).includes(dateObj.getDay());
+}
+
+// 当前连续天数:从今天往前数。规则:
+//  - 打了卡 → 计 1 天
+//  - 没打卡但是 Treat Day → 跳过,不断
+//  - 今天还没打卡 → 宽限(一天还没结束),从昨天接着数
+//  - 其他没打卡的日子 → 连续中断
 function curStreak(habitId) {
-  const set = new Set(state.checks[habitId] || []);
+  const habit = habitById(habitId);
+  const dates = state.checks[habitId] || [];
+  if (dates.length === 0) return 0;
+  const set = new Set(dates);
+  const earliest = dates.slice().sort()[0]; // 最早一次打卡,再往前没必要数了
   let d = new Date();
-  if (!set.has(fmt(d))) d.setDate(d.getDate() - 1);
-  let n = 0;
-  while (set.has(fmt(d))) { n++; d.setDate(d.getDate() - 1); }
+  let n = 0, isToday = true;
+  while (fmt(d) >= earliest) {
+    if (set.has(fmt(d))) n++;
+    else if (isTreatDay(habit, d)) { /* 休息日,跳过 */ }
+    else if (isToday) { /* 今天的宽限 */ }
+    else break;
+    isToday = false;
+    d.setDate(d.getDate() - 1);
+  }
   return n;
 }
 
-// 历史最长连续天数
+// 历史最长连续天数:两次打卡之间如果隔的全是 Treat Day,也算连续
 function bestStreak(habitId) {
+  const habit = habitById(habitId);
   const dates = (state.checks[habitId] || []).slice().sort();
   let best = 0, cur = 0, prev = null;
   for (const ds of dates) {
     if (prev) {
-      const gap = (new Date(ds) - new Date(prev)) / 86400000; // 相差几天(86400000毫秒=1天)
-      cur = (gap === 1) ? cur + 1 : 1;
+      let ok = true;
+      const d = new Date(prev + 'T12:00:00');
+      d.setDate(d.getDate() + 1);
+      while (fmt(d) < ds) {            // 检查中间隔的每一天
+        if (!isTreatDay(habit, d)) { ok = false; break; }
+        d.setDate(d.getDate() + 1);
+      }
+      cur = ok ? cur + 1 : 1;
     } else cur = 1;
     best = Math.max(best, cur);
     prev = ds;
@@ -383,14 +466,23 @@ function bestStreak(habitId) {
   return best;
 }
 
+// 某习惯在某年某月打了几次卡
+function monthCount(habitId, y, m) {
+  const prefix = y + '-' + String(m + 1).padStart(2, '0') + '-';
+  return (state.checks[habitId] || []).filter(ds => ds.startsWith(prefix)).length;
+}
+
 /* ================================================================
    界面部分
 ================================================================ */
-let editMode = false;                 // 是否处于"管理"(可删除)模式
-let calMonth = new Date();            // 日历当前显示的月份
-let calHabitId = null;                // 日历当前看哪个习惯
+let editMode = false;            // 是否处于"管理"(可编辑/删除)模式
+let calMonth = new Date();       // 日历当前显示的月份
+let calSelId = null;             // 日历图例当前选中的习惯(选中后才能补卡)
+let statsMonth = new Date();     // 统计页热力图当前月份
+let statsHabitId = null;         // 统计页当前看哪个习惯
 
-const WEEKDAYS = ['一','二','三','四','五','六','日'];
+const WEEKDAYS_MON = ['一','二','三','四','五','六','日'];   // 日历表头(周一开始)
+const WEEKDAYS_SUN = ['日','一','二','三','四','五','六'];   // 热力图行标(周日开始)
 
 function renderAll() {
   renderToday();
@@ -403,7 +495,7 @@ function renderToday() {
   const today = todayStr();
   const d = new Date();
   document.getElementById('header-date').textContent =
-    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 星期${WEEKDAYS[(d.getDay()+6)%7]}`;
+    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 星期${WEEKDAYS_MON[(d.getDay()+6)%7]}`;
 
   const list = document.getElementById('habit-list');
   list.innerHTML = '';
@@ -414,6 +506,7 @@ function renderToday() {
     const done = isChecked(h.id, today);
     if (done) doneCount++;
     const streak = curStreak(h.id);
+    const treatToday = isTreatDay(h, d);
 
     const card = document.createElement('div');
     card.className = 'habit-card';
@@ -421,94 +514,112 @@ function renderToday() {
       <div class="habit-emoji" style="background:${h.color}22">${h.emoji}</div>
       <div class="habit-info">
         <div class="habit-name">${h.name}</div>
-        <div class="habit-streak">${streak > 0 ? '🔥 已连续 ' + streak + ' 天' : '今天开始新纪录吧'}</div>
+        <div class="habit-streak">${streak > 0 ? '🔥 已连续 ' + streak + ' 天' : '今天开始新纪录吧'}${treatToday ? ' · 🍦今天是Treat Day' : ''}</div>
       </div>
       ${editMode
         ? `<button class="del-btn" onclick="event.stopPropagation();delHabit('${h.id}')">✕</button>`
         : `<button class="check-btn ${done ? 'done' : ''}" style="${done ? 'background:' + h.color : ''}">${done ? '✓' : ''}</button>`}
     `;
-    // 点整张卡片就等于打卡(编辑模式下不打卡)
-    card.onclick = () => { if (!editMode) toggleCheck(h.id, today); };
+    // 平时点卡片 = 打卡;管理模式下点卡片 = 编辑
+    card.onclick = () => { editMode ? openModal(h.id) : toggleCheck(h.id, today); };
     list.appendChild(card);
   }
 
   document.getElementById('today-summary').textContent =
     state.habits.length ? `今日进度:${doneCount} / ${state.habits.length}` : '';
   document.getElementById('edit-btn').textContent = editMode ? '完成' : '管理';
+  document.getElementById('edit-hint').classList.toggle('hidden', !editMode);
 }
 
 function toggleEdit() { editMode = !editMode; renderToday(); }
 
 function delHabit(id) {
-  const h = state.habits.find(x => x.id === id);
+  const h = habitById(id);
   if (!confirm(`确定删除「${h.name}」吗?它的打卡记录也会一起删除。`)) return;
   state.habits = state.habits.filter(x => x.id !== id);
   delete state.checks[id];
-  if (calHabitId === id) calHabitId = null;
+  if (calSelId === id) calSelId = null;
+  if (statsHabitId === id) statsHabitId = null;
   save();
   renderAll();
 }
 
-/* ---------- 日历页 ---------- */
+/* ---------- 日历页:所有习惯的彩球矩阵 ---------- */
 function renderCalendar() {
-  const chips = document.getElementById('cal-chips');
-  chips.innerHTML = '';
+  const grid = document.getElementById('cal-grid');
+  const legend = document.getElementById('cal-legend');
+  const statsLine = document.getElementById('cal-stats');
+  const tip = document.getElementById('cal-tip');
+
   if (state.habits.length === 0) {
-    document.getElementById('cal-grid').innerHTML = '';
-    document.getElementById('cal-title').textContent = '先去添加一个习惯吧';
-    document.getElementById('cal-stats').innerHTML = '';
+    document.getElementById('cal-title').textContent = '日历';
+    grid.innerHTML = ''; legend.innerHTML = '';
+    statsLine.classList.add('hidden');
+    tip.textContent = '先去"今天"页添加一个习惯吧';
     return;
   }
-  // 默认选中第一个习惯
-  if (!calHabitId || !state.habits.find(h => h.id === calHabitId)) calHabitId = state.habits[0].id;
 
-  for (const h of state.habits) {
-    const c = document.createElement('button');
-    c.className = 'chip' + (h.id === calHabitId ? ' active' : '');
-    if (h.id === calHabitId) c.style.background = h.color;
-    c.textContent = h.emoji + ' ' + h.name;
-    c.onclick = () => { calHabitId = h.id; renderCalendar(); };
-    chips.appendChild(c);
-  }
-
-  const habit = state.habits.find(h => h.id === calHabitId);
   const y = calMonth.getFullYear(), m = calMonth.getMonth();
   document.getElementById('cal-title').textContent = `${y}年${m + 1}月`;
 
-  const grid = document.getElementById('cal-grid');
-  grid.innerHTML = WEEKDAYS.map(w => `<div class="cal-week">${w}</div>`).join('');
+  // 表头(周一开始)
+  grid.innerHTML = WEEKDAYS_MON.map(w => `<div class="cal-week">${w}</div>`).join('');
 
-  // 这个月1号是星期几,前面要空几格(我们的日历从周一开始)
+  // 这个月1号是星期几,前面要空几格
   const offset = (new Date(y, m, 1).getDay() + 6) % 7;
   for (let i = 0; i < offset; i++) grid.appendChild(document.createElement('div'));
 
-  const daysInMonth = new Date(y, m + 1, 0).getDate(); // 这个月有几天
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
   const today = todayStr();
-  let monthChecked = 0;
 
   for (let day = 1; day <= daysInMonth; day++) {
     const ds = fmt(new Date(y, m, day));
-    const checked = isChecked(calHabitId, ds);
-    if (checked) monthChecked++;
     const isFuture = ds > today;
 
-    const btn = document.createElement('button');
-    btn.className = 'cal-day'
-      + (checked ? ' checked' : '')
-      + (ds === today ? ' today-ring' : '')
-      + (isFuture ? ' future' : '');
-    if (checked) btn.style.background = habit.color;
-    btn.textContent = day;
-    // 点过去的日子 = 补卡 / 取消;未来不可点
-    if (!isFuture) btn.onclick = () => toggleCheck(calHabitId, ds);
-    grid.appendChild(btn);
+    // 这一天打过卡的习惯 → 彩球(最多9个)
+    const dots = state.habits
+      .filter(h => isChecked(h.id, ds))
+      .slice(0, 9)
+      .map(h => `<span class="d" style="background:${h.color}"></span>`)
+      .join('');
+
+    const cell = document.createElement('button');
+    cell.className = 'cal-cell' + (isFuture ? ' future' : '');
+    cell.innerHTML = `
+      <span class="cal-num ${ds === today ? 'today' : ''}">${day}</span>
+      <span class="cal-dots">${dots}</span>
+    `;
+    // 选中了某个习惯后,点日期 = 给它补卡/取消(未来的日子不行)
+    if (!isFuture) cell.onclick = () => { if (calSelId) toggleCheck(calSelId, ds); };
+    grid.appendChild(cell);
   }
 
-  document.getElementById('cal-stats').innerHTML = `
-    <div><div class="num" style="color:${habit.color}">${monthChecked}</div><div class="lbl">本月打卡</div></div>
-    <div><div class="num" style="color:${habit.color}">${curStreak(calHabitId)}</div><div class="lbl">当前连续</div></div>
-    <div><div class="num" style="color:${habit.color}">${bestStreak(calHabitId)}</div><div class="lbl">最长纪录</div></div>
-  `;
+  // 图例:每个习惯一个胶囊(颜色球+名字),点击选中/取消选中
+  legend.innerHTML = '';
+  for (const h of state.habits) {
+    const c = document.createElement('button');
+    const sel = h.id === calSelId;
+    c.className = 'lg-chip' + (sel ? ' sel' : '');
+    if (sel) { c.style.borderColor = h.color; c.style.background = h.color + '18'; }
+    c.innerHTML = `<span class="d" style="background:${h.color}"></span>${h.name}`;
+    c.onclick = () => { calSelId = sel ? null : h.id; renderCalendar(); };
+    legend.appendChild(c);
+  }
+
+  // 选中习惯 → 显示它的三个统计数字
+  if (calSelId && habitById(calSelId)) {
+    const h = habitById(calSelId);
+    statsLine.classList.remove('hidden');
+    statsLine.innerHTML = `
+      <div><div class="num" style="color:${h.color}">${monthCount(calSelId, y, m)}</div><div class="lbl">本月打卡</div></div>
+      <div><div class="num" style="color:${h.color}">${curStreak(calSelId)}</div><div class="lbl">当前连续</div></div>
+      <div><div class="num" style="color:${h.color}">${bestStreak(calSelId)}</div><div class="lbl">最长纪录</div></div>
+    `;
+    tip.textContent = `已选中「${h.name}」:点任意日期可补卡/取消(未来的日子不行)`;
+  } else {
+    statsLine.classList.add('hidden');
+    tip.textContent = '点下方图例选中一个习惯:查看它的统计,还能点日期补卡';
+  }
 }
 
 function moveMonth(delta) {
@@ -516,15 +627,63 @@ function moveMonth(delta) {
   renderCalendar();
 }
 
-/* ---------- 统计页 ---------- */
+/* ---------- 统计页:习惯选项 + 月度热力图 ---------- */
 function renderStats() {
-  // 最近30天每个习惯的完成率,画成横条
+  const chips = document.getElementById('stats-chips');
+  const wrap = document.getElementById('heat-grid-wrap');
   const bars = document.getElementById('stats-bars');
+
   if (state.habits.length === 0) {
+    chips.innerHTML = '';
+    document.getElementById('heat-title').textContent = '暂无数据';
+    wrap.innerHTML = '';
+    document.getElementById('heat-summary').textContent = '';
     bars.innerHTML = '<div style="font-size:13px;color:var(--text-light)">暂无数据</div>';
-    document.getElementById('dots-table').innerHTML = '';
     return;
   }
+  if (!statsHabitId || !habitById(statsHabitId)) statsHabitId = state.habits[0].id;
+  const habit = habitById(statsHabitId);
+
+  // 顶部习惯选项胶囊
+  chips.innerHTML = '';
+  for (const h of state.habits) {
+    const c = document.createElement('button');
+    c.className = 'chip' + (h.id === statsHabitId ? ' active' : '');
+    if (h.id === statsHabitId) c.style.background = h.color;
+    c.textContent = h.emoji + ' ' + h.name;
+    c.onclick = () => { statsHabitId = h.id; renderStats(); };
+    chips.appendChild(c);
+  }
+
+  // 月度热力图:行 = 周日~周六,列 = 第几周
+  const y = statsMonth.getFullYear(), m = statsMonth.getMonth();
+  document.getElementById('heat-title').textContent = `${y}年${m + 1}月`;
+
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const firstDow = new Date(y, m, 1).getDay();              // 1号是周几(0=周日)
+  const weeks = Math.ceil((firstDow + daysInMonth) / 7);    // 这个月横跨几周(几列)
+  const today = todayStr();
+
+  // 横排版:第一行是星期表头(日~六),下面每一行是一周
+  let html = `<div class="heat-grid" style="grid-template-columns:repeat(7, 20px)">`;
+  html += WEEKDAYS_SUN.map(w => `<div class="heat-label">${w}</div>`).join('');
+  for (let w = 0; w < weeks; w++) {             // 一行 = 一周
+    for (let col = 0; col < 7; col++) {         // 一列 = 一个星期几
+      const day = w * 7 + col - firstDow + 1;
+      if (day < 1 || day > daysInMonth) { html += '<div class="heat-cell none"></div>'; continue; }
+      const ds = fmt(new Date(y, m, day));
+      if (isChecked(statsHabitId, ds)) html += `<div class="heat-cell" style="background:${habit.color}"></div>`;
+      else if (ds > today) html += '<div class="heat-cell future"></div>';
+      else html += '<div class="heat-cell"></div>';
+    }
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+
+  document.getElementById('heat-summary').textContent =
+    `${habit.emoji} ${habit.name} · 本月打卡 ${monthCount(statsHabitId, y, m)} 天`;
+
+  // 最近30天完成率(所有习惯对比)
   const last30 = [];
   for (let i = 29; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i);
@@ -539,22 +698,11 @@ function renderStats() {
       <div class="bar-pct">${pct}%</div>
     </div>`;
   }).join('');
+}
 
-  // 最近7天:习惯 × 日期 的小圆点表格
-  const last7 = last30.slice(-7);
-  const table = document.getElementById('dots-table');
-  table.innerHTML =
-    '<tr><th></th>' + last7.map(ds => {
-      const d = new Date(ds);
-      return `<th>${ds === todayStr() ? '今' : d.getDate()}</th>`;
-    }).join('') + '</tr>'
-    + state.habits.map(h =>
-      '<tr><td class="hname">' + h.emoji + ' ' + h.name + '</td>'
-      + last7.map(ds =>
-          `<td><span class="dot" style="${isChecked(h.id, ds) ? 'background:' + h.color : ''}"></span></td>`
-        ).join('')
-      + '</tr>'
-    ).join('');
+function moveStatsMonth(delta) {
+  statsMonth = new Date(statsMonth.getFullYear(), statsMonth.getMonth() + delta, 1);
+  renderStats();
 }
 
 /* ---------- 页面切换 ---------- */
@@ -565,10 +713,14 @@ function switchPage(name) {
   }
 }
 
-/* ---------- 添加习惯弹窗 ---------- */
+/* ---------- 添加/编辑习惯弹窗 ---------- */
 const EMOJIS = ['💧','📖','🏃','🧘','💪','🛌','🍎','📝','🎹','🧹','🌞','🚫','💊','🪥','🐶','💰'];
-const COLORS = ['#6c7cf5','#f56c8b','#f5a76c','#53c283','#4FC3F7','#b06cf5','#f5d36c','#7d8a99'];
+const COLORS = ['#f0a800','#f56c8b','#f5a76c','#53c283','#4FC3F7','#b06cf5','#6c7cf5','#7d8a99'];
+// Treat Day 选择按钮的顺序:周一~周日;对应 getDay() 的数字 1~6 和 0
+const WEEK_OPTS = [['一',1],['二',2],['三',3],['四',4],['五',5],['六',6],['日',0]];
 let selEmoji = EMOJIS[0], selColor = COLORS[0];
+let selDays = new Set();      // 当前弹窗里选中的 Treat Day
+let editingId = null;         // 正在编辑哪个习惯(null = 新增)
 
 function buildPickers() {
   const ep = document.getElementById('emoji-picker');
@@ -589,26 +741,48 @@ function buildPickers() {
     b.onclick = () => { selColor = c; buildPickers(); };
     cp.appendChild(b);
   }
+  const wp = document.getElementById('week-picker');
+  wp.innerHTML = '';
+  for (const [label, dow] of WEEK_OPTS) {
+    const b = document.createElement('button');
+    b.className = 'opt wopt' + (selDays.has(dow) ? ' sel' : '');
+    b.textContent = label;
+    b.onclick = () => { selDays.has(dow) ? selDays.delete(dow) : selDays.add(dow); buildPickers(); };
+    wp.appendChild(b);
+  }
 }
 
-function openModal() {
-  selEmoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)]; // 随机给个默认图标
-  selColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+function openModal(habitId) {
+  editingId = habitId || null;
+  const h = habitId ? habitById(habitId) : null;
+  selEmoji = h ? h.emoji : EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+  selColor = h ? h.color : COLORS[Math.floor(Math.random() * COLORS.length)];
+  selDays = new Set(h ? (h.treatDays || []) : []);
+  document.getElementById('modal-title').textContent = h ? '编辑习惯' : '添加新习惯';
+  document.getElementById('new-name').value = h ? h.name : '';
   buildPickers();
-  document.getElementById('new-name').value = '';
   document.getElementById('modal').classList.add('show');
-  document.getElementById('new-name').focus();
+  if (!h) document.getElementById('new-name').focus();
 }
 function closeModal() { document.getElementById('modal').classList.remove('show'); }
 
-function addHabit() {
+function saveHabit() {
   const name = document.getElementById('new-name').value.trim();
   if (!name) { alert('给习惯起个名字吧'); return; }
-  state.habits.push({
-    id: 'h' + Date.now(),  // 用当前时间戳当作独一无二的编号
-    name, emoji: selEmoji, color: selColor,
-    createdAt: todayStr()
-  });
+  if (editingId) {
+    // 编辑现有习惯
+    const h = habitById(editingId);
+    h.name = name; h.emoji = selEmoji; h.color = selColor;
+    h.treatDays = [...selDays];
+  } else {
+    // 新增习惯
+    state.habits.push({
+      id: 'h' + Date.now(),  // 用当前时间戳当作独一无二的编号
+      name, emoji: selEmoji, color: selColor,
+      treatDays: [...selDays],
+      createdAt: todayStr()
+    });
+  }
   save();
   closeModal();
   renderAll();
