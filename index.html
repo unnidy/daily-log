@@ -200,6 +200,13 @@ header .date { font-size: 13px; opacity: .75; margin-top: 4px; }
 .heat-cell { border-radius: 5px; background: var(--bg); }
 .heat-cell.none { background: transparent; }
 .heat-cell.future { background: transparent; border: 1.5px dashed var(--line); }
+/* 漏打的日子:淡红底 + 一个叉,提醒补上 */
+.heat-cell.miss {
+  background: #fdeaea;
+  color: #e09b9b;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
 .heat-summary { text-align: center; font-size: 12px; color: var(--text-light); margin-top: 12px; }
 .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; }
 .bar-label { width: 86px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -667,21 +674,31 @@ function renderStats() {
   // 横排版:第一行是星期表头(日~六),下面每一行是一周
   let html = `<div class="heat-grid" style="grid-template-columns:repeat(7, 20px)">`;
   html += WEEKDAYS_SUN.map(w => `<div class="heat-label">${w}</div>`).join('');
+  const created = habit.createdAt || '';        // 习惯创建日,在这之前不提醒漏打
+  let missCount = 0;                            // 本月漏打天数
   for (let w = 0; w < weeks; w++) {             // 一行 = 一周
     for (let col = 0; col < 7; col++) {         // 一列 = 一个星期几
       const day = w * 7 + col - firstDow + 1;
       if (day < 1 || day > daysInMonth) { html += '<div class="heat-cell none"></div>'; continue; }
-      const ds = fmt(new Date(y, m, day));
-      if (isChecked(statsHabitId, ds)) html += `<div class="heat-cell" style="background:${habit.color}"></div>`;
-      else if (ds > today) html += '<div class="heat-cell future"></div>';
-      else html += '<div class="heat-cell"></div>';
+      const dObj = new Date(y, m, day);
+      const ds = fmt(dObj);
+      if (isChecked(statsHabitId, ds)) {
+        html += `<div class="heat-cell" style="background:${habit.color}"></div>`;       // 打卡了:习惯色
+      } else if (ds > today) {
+        html += '<div class="heat-cell future"></div>';                                  // 未来:虚线框
+      } else if (ds < created || ds === today || isTreatDay(habit, dObj)) {
+        html += '<div class="heat-cell"></div>';      // 建习惯之前 / 今天(还有机会) / 休息日:普通空格
+      } else {
+        html += '<div class="heat-cell miss">✕</div>'; missCount++;                       // 漏打:红叉提醒
+      }
     }
   }
   html += '</div>';
   wrap.innerHTML = html;
 
   document.getElementById('heat-summary').textContent =
-    `${habit.emoji} ${habit.name} · 本月打卡 ${monthCount(statsHabitId, y, m)} 天`;
+    `${habit.emoji} ${habit.name} · 本月打卡 ${monthCount(statsHabitId, y, m)} 天`
+    + (missCount > 0 ? ` · 漏打 ${missCount} 天 ✕` : '');
 
   // 最近30天完成率(所有习惯对比)
   const last30 = [];
